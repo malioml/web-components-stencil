@@ -86,7 +86,10 @@ export class StockPrice {
       this.error = null;
       this.fetchedPrice = +parsedRes['Global Quote']['05. price'];
     })
-      .catch(err => this.error = err.message);
+      .catch(err => {
+        this.error = err.message;
+        this.fetchedPrice = null;
+      });
   }
 
   render() {
