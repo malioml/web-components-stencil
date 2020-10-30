@@ -1,4 +1,4 @@
-import { Component, h, State, Element, Prop, Watch } from '@stencil/core';
+import { Component, h, State, Element, Prop, Watch, Listen } from '@stencil/core';
 import { AV_API_KEY } from '../../global/global';
 
 @Component({
@@ -21,6 +21,7 @@ export class StockPrice {
   stockSymbolChanged(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
       this.stockUserInput = newValue;
+      this.stockInputValid = true;
       this.fetchStockPrice(newValue);
     }
   }
@@ -67,11 +68,17 @@ export class StockPrice {
     }
   }
 
+  @Listen('ucSymbolSelected', {target: 'body'})
+  onStockSymbolSelected(event: CustomEvent) {
+    if (event.detail && event.detail !== this.stockSymbol) {
+      this.stockSymbol = event.detail;
+    }
+  }
+
   fetchStockPrice(stockSymbol: string) {
     fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=${AV_API_KEY}`)
-      .then(res => {
-        return res.json();
-      }).then(parsedRes => {
+      .then(res =>res.json())
+      .then(parsedRes => {
       if (!parsedRes || !parsedRes['Global Quote'] || !parsedRes['Global Quote']['05. price']) {
         this.fetchedPrice = null;
         throw new Error('Invalid symbol!');
